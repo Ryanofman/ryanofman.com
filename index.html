@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Curious Place</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #0a0a0a;
+            color: #ccc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        #container {
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Hidden by default */
+        .hidden {
+            display: none;
+        }
+
+        /* Fade in animation */
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Main sections */
+        #start-screen {
+            text-align: center;
+            padding: 40px;
+        }
+
+        #main-room {
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #aaa;
+        }
+
+        /* Buttons */
+        button {
+            background: none;
+            border: 1px solid #666;
+            color: #ccc;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            border-color: #fff;
+            color: #fff;
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        /* Room description */
+        #room-description {
+            margin: 30px 0;
+            min-height: 100px;
+        }
+
+        /* Actions container */
+        #actions {
+            margin: 30px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* ASCII Art Styles */
+        .ascii-art {
+            font-family: monospace;
+            line-height: 1.2;
+            white-space: pre;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 20px auto;
+        }
+
+        .ascii-art:hover {
+            color: #fff;
+            transform: scale(1.02);
+        }
+
+        .ascii-art.clickable:hover {
+            color: #4a9eff;
+            text-shadow: 0 0 10px rgba(74, 158, 255, 0.3);
+        }
+
+        .ascii-art.cat {
+            color: #888;
+            animation: catBreathe 4s ease-in-out infinite;
+        }
+
+        @keyframes catBreathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* Special effects */
+        .glow {
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .stars {
+            color: #4a9eff;
+            text-shadow: 0 0 5px rgba(74, 158, 255, 0.5);
+        }
+
+        /* Portal effect */
+        .portal {
+            display: inline-block;
+            padding: 20px 40px;
+            margin: 20px;
+            border: 2px solid #4a9eff;
+            color: #4a9eff;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .portal::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(74, 158, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.5s ease;
+        }
+
+        .portal:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .portal:hover {
+            color: #fff;
+            text-shadow: 0 0 20px rgba(74, 158, 255, 0.8);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .ascii-art {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>A room. Quiet.</h1>
+            <p>A gentle hum fills the air.</p>
+            <button onclick="startJourney()">listen closer</button>
+        </div>
+
+        <!-- Main Room -->
+        <div id="main-room" class="hidden">
+            <div id="room-description">
+                <p>The hum grows warmer.</p>
+            </div>
+            <div id="actions" role="region" aria-label="Available actions">
+                <!-- Actions will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            stage: 'start',
+            discoveries: 0,
+            found: {
+                source: false,
+                patterns: false,
+                telescope: false,
+                cat: false,
+                key: false
+            }
+        };
+
+        // Start the journey
+        function startJourney() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('main-room').classList.remove('hidden');
+            document.getElementById('main-room').classList.add('fade-in');
+            
+            gameState.stage = 'searching';
+            showSearching();
+        }
+
+        // Add an action button
+        function addAction(text, callback) {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.onclick = callback;
+            button.classList.add('fade-in');
+            document.getElementById('actions').appendChild(button);
+        }
+
+        // Show searching phase
+        function showSearching() {
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <p>The hum comes from everywhere and nowhere.</p>
+                <p>Three faint glows appear in the darkness.</p>
+            `;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            addAction('follow the blue glow', followBlue);
+            addAction('follow the green glow', followGreen);
+            addAction('follow the amber glow', followAmber);
+        }
+
+        // Follow blue glow
+        function followBlue() {
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <pre class="ascii-art clickable" onclick="discoverTelescope()">
+       __
+      /  \\___
+     /  __   \\
+    |  /  \\   |
+    | |    |  |
+    |  \\__/   |
+     \\      _/
+      |    |
+      |____|
+                </pre>
+                <p>A device for seeing far away things up close.</p>
+            `;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            addAction('look through it', discoverTelescope);
+            addAction('go back', showSearching);
+        }
+
+        // Follow green glow
+        function followGreen() {
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <pre class="ascii-art" style="color: #4aff4a;">
+    01001000 01100101 01101100
+    01101100 01101111 00100000
+    01110111 01101111 01110010
+    01101100 01100100 00100001
+                </pre>
+                <p>Patterns within patterns. Messages in the machine.</p>
+            `;
+            
+            gameState.found.patterns = true;
+            gameState.discoveries++;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            addAction('decode', () => {
+                desc.innerHTML += `<p class="glow">The patterns whisper: "Hello world!"</p>`;
+                checkProgress();
+            });
+            addAction('go back', showSearching);
+        }
+
+        // Follow amber glow
+        function followAmber() {
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <pre class="ascii-art cat">
+        /\\_/\\  
+       ( o.o ) 
+        > ^ <
+                </pre>
+                <p>A familiar friend. It seems to know the way.</p>
+            `;
+            
+            gameState.found.cat = true;
+            gameState.discoveries++;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            addAction('follow', () => {
+                desc.innerHTML = `<p>"Mrow," says Cosmo, leading you deeper.</p>`;
+                checkProgress();
+            });
+            addAction('pet', () => {
+                desc.innerHTML += `<p>Cosmo purrs. You feel wiser.</p>`;
+            });
+            addAction('go back', showSearching);
+        }
+
+        // Discover telescope
+        function discoverTelescope() {
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <p class="stars">✦ ✧ ★ ✦ ✧</p>
+                <p>Through the lens, you see not stars but possibilities.</p>
+                <p>Each point of light is a story waiting to be told.</p>
+            `;
+            
+            gameState.found.telescope = true;
+            gameState.discoveries++;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            addAction('continue exploring', checkProgress);
+        }
+
+        // Check progress
+        function checkProgress() {
+            if (gameState.discoveries >= 3) {
+                showFinalRoom();
+            } else {
+                showSearching();
+            }
+        }
+
+        // Show final room
+        function showFinalRoom() {
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <pre class="ascii-art">
+         ___
+        |   |
+        | ◯ |
+        |___|
+          |
+         ___
+        </pre>
+                <p>A key materializes from the gathered light.</p>
+                <p class="glow">"You've been curious enough. Time to see what's real."</p>
+                <a href="portfolio.html" class="portal">Enter the real world →</a>
+            `;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            
+            // Save completion
+            localStorage.setItem('gameCompleted', 'true');
+        }
+    </script>
+</body>
+</html>
