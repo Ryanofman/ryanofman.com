@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Curious Place</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #0a0a0a;
+            color: #ccc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        #container {
+            width: 90%;
+            max-width: 900px;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Hidden by default */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Fade in animation */
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Main sections */
+        #start-screen {
+            text-align: center;
+            padding: 40px;
+        }
+
+        #main-room {
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #aaa;
+        }
+
+        /* Buttons */
+        button {
+            background: none;
+            border: 1px solid #666;
+            color: #ccc;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover:not(:disabled) {
+            border-color: #fff;
+            color: #fff;
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Room description */
+        #room-description {
+            margin: 30px 0;
+            min-height: 100px;
+        }
+
+        /* Actions container */
+        #actions {
+            margin: 30px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Inventory */
+        #inventory {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.9);
+            border: 1px solid #333;
+            padding: 15px;
+            min-width: 200px;
+            border-radius: 5px;
+        }
+
+        #inventory h3 {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .inventory-item {
+            color: #4a9eff;
+            padding: 5px 0;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .inventory-item.key-item {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255,215,0,0.3);
+        }
+
+        /* ASCII Art Styles */
+        .ascii-art {
+            font-family: monospace;
+            line-height: 1.2;
+            white-space: pre;
+            color: #666;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 20px auto;
+        }
+
+        .ascii-art.cat {
+            color: #888;
+            animation: catBreathe 4s ease-in-out infinite;
+        }
+
+        @keyframes catBreathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* Special effects */
+        .glow {
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .key-glow {
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255,215,0,0.6);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* Game container */
+        .game-container {
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-canvas {
+            display: block;
+            margin: 0 auto;
+            border: 1px solid #444;
+            background: #111;
+        }
+
+        .game-instructions {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            margin: 15px 0;
+        }
+
+        .game-score {
+            text-align: center;
+            font-size: 20px;
+            color: #4a9eff;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        /* Portal effect */
+        .portal {
+            display: inline-block;
+            padding: 20px 40px;
+            margin: 20px;
+            border: 2px solid #4a9eff;
+            color: #4a9eff;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .portal::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(74, 158, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.5s ease;
+        }
+
+        .portal:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .portal:hover {
+            color: #fff;
+            text-shadow: 0 0 20px rgba(74, 158, 255, 0.8);
+            border-color: #6bb6ff;
+        }
+
+        /* Final puzzle */
+        .puzzle-container {
+            margin: 30px auto;
+            max-width: 600px;
+        }
+
+        .key-slots {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .key-slot {
+            width: 120px;
+            height: 120px;
+            border: 3px dashed #666;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .key-slot:hover {
+            border-color: #888;
+            background: rgba(255,255,255,0.05);
+            transform: scale(1.05);
+        }
+
+        .key-slot.filled {
+            border-color: #ffd700;
+            background: rgba(255,215,0,0.1);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+            50% { box-shadow: 0 0 25px rgba(255,215,0,0.6); }
+        }
+
+        /* Victory screen */
+        .victory-screen {
+            text-align: center;
+            padding: 40px;
+            animation: victoryGlow 2s ease-in-out;
+        }
+
+        @keyframes victoryGlow {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .ascii-art {
+                font-size: 10px;
+            }
+            
+            #inventory {
+                position: static;
+                margin: 20px auto;
+                max-width: 300px;
+            }
+            
+            .key-slot {
+                width: 80px;
+                height: 80px;
+                font-size: 30px;
+            }
+        }
+
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #333;
+            border-top-color: #4a9eff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>A room. Quiet.</h1>
+            <p>A gentle hum fills the air.</p>
+            <p style="color: #666; font-size: 12px;">Something waits to be discovered...</p>
+            <button onclick="startJourney()">listen closer</button>
+        </div>
+
+        <!-- Main Room -->
+        <div id="main-room" class="hidden">
+            <div id="room-description">
+                <p>The hum grows warmer.</p>
+            </div>
+            <div id="actions" role="region" aria-label="Available actions">
+                <!-- Actions will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Inventory -->
+        <div id="inventory" class="hidden">
+            <h3>Inventory</h3>
+            <div id="inventory-items">
+                <div style="color: #666; font-size: 12px;">Empty</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Phaser 3 from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
+    
+    <script>
+        // Wait for page and Phaser to load
+        let phaserReady = false;
+        
+        window.addEventListener('load', function() {
+            // Give Phaser time to fully initialize
+            setTimeout(() => {
+                if (typeof Phaser !== 'undefined') {
+                    phaserReady = true;
+                    console.log('Phaser loaded successfully!');
+                } else {
+                    console.error('Phaser failed to load. Games will not work properly.');
+                    alert('Game engine failed to load. Please refresh the page to play the mini-games.');
+                }
+            }, 500);
+        });
+        // Game state
+        let gameState = {
+            stage: 'start',
+            currentRoom: 'center',
+            inventory: [],
+            keys: {
+                rhythm: false,
+                space: false,
+                battle: false
+            },
+            puzzleSolved: false,
+            visitedRooms: new Set(),
+            activeGame: null
+        };
+
+        // Room descriptions
+        const rooms = {
+            center: {
+                description: `<p>You stand in a circular chamber. The hum resonates from the walls.</p>
+                             <p>Three passages lead away: North glows with musical energy, East shimmers with starlight, West echoes with the clash of steel.</p>
+                             <p>In the corner, a familiar shape stirs...</p>`,
+                exits: ['north', 'east', 'west'],
+                special: 'cosmo'
+            },
+            north: {
+                description: `<p>A long hallway stretches before you, ending at an ornate door.</p>
+                             <p>Musical notes dance in the air, forming patterns of light.</p>`,
+                exits: ['south'],
+                special: 'rhythm_door'
+            },
+            east: {
+                description: `<p>The walls here are covered in star charts and constellations.</p>
+                             <p>A viewport shows the infinite cosmos beyond.</p>`,
+                exits: ['west'],
+                special: 'space_door'
+            },
+            west: {
+                description: `<p>Training dummies and ancient weapons line the walls.</p>
+                             <p>The air feels charged with the memory of countless battles.</p>`,
+                exits: ['east'],
+                special: 'battle_door'
+            }
+        };
+
+        // Start the journey
+        function startJourney() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('main-room').classList.remove('hidden');
+            document.getElementById('inventory').classList.remove('hidden');
+            document.getElementById('main-room').classList.add('fade-in');
+            
+            gameState.stage = 'exploring';
+            showRoom('center');
+        }
+
+        // Show current room
+        function showRoom(roomName) {
+            // Clean up any active game first
+            if (gameState.activeGame) {
+                gameState.activeGame.destroy(true);
+                gameState.activeGame = null;
+            }
+            
+            gameState.currentRoom = roomName;
+            gameState.visitedRooms.add(roomName);
+            
+            const room = rooms[roomName];
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = room.description;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            
+            // Add movement options
+            room.exits.forEach(exit => {
+                let buttonText = `Go ${exit}`;
+                if (exit === 'south' && roomName === 'north') buttonText = 'Return south';
+                if (exit === 'west' && roomName === 'east') buttonText = 'Return west';
+                if (exit === 'east' && roomName === 'west') buttonText = 'Return east';
+                
+                addAction(buttonText, () => {
+                    const destinations = {
+                        'north': 'north',
+                        'east': 'east',
+                        'west': 'west',
+                        'south': 'center'
+                    };
+                    showRoom(destinations[exit] || 'center');
+                });
+            });
+            
+            // Add special interactions
+            if (room.special) {
+                handleSpecialRoom(room.special);
+            }
+            
+            // Check if all keys are collected
+            if (gameState.keys.rhythm && gameState.keys.space && gameState.keys.battle && roomName === 'center' && !gameState.puzzleSolved) {
+                setTimeout(() => {
+                    desc.innerHTML += `<p class="key-glow">Cosmo's eyes glow with golden light. "The time has come..."</p>`;
+                    addAction('🌟 Talk to Cosmo', startFinalPuzzle);
+                }, 500);
+            }
+        }
+
+        // Add an action button
+        function addAction(text, callback) {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.onclick = callback;
+            button.classList.add('fade-in');
+            document.getElementById('actions').appendChild(button);
+        }
+
+        // Handle special room features
+        function handleSpecialRoom(special) {
+            switch(special) {
+                case 'cosmo':
+                    const desc = document.getElementById('room-description');
+                    desc.innerHTML += `
+                        <pre class="ascii-art cat">
+        /\\_/\\  
+       ( o.o ) 
+        > ^ <
+                        </pre>
+                        <p style="color: #888;">Cosmo watches you with knowing eyes.</p>
+                    `;
+                    if (!allKeysCollected()) {
+                        addAction('Talk to Cosmo', () => {
+                            showDialog("Cosmo meows softly: 'Three keys you must find, each behind a trial. Music, stars, and courage shall light your way.'");
+                        });
+                    }
+                    break;
+                    
+                case 'rhythm_door':
+                    if (!gameState.keys.rhythm) {
+                        addAction('🎵 Examine the musical door', startRhythmGame);
+                    } else {
+                        const d = document.getElementById('room-description');
+                        d.innerHTML += `<p style="color: #4a9eff;">The door stands open, its trial complete.</p>`;
+                    }
+                    break;
+                    
+                case 'space_door':
+                    if (!gameState.keys.space) {
+                        addAction('⭐ Approach the cosmic viewport', startSpaceGame);
+                    } else {
+                        const d = document.getElementById('room-description');
+                        d.innerHTML += `<p style="color: #4a9eff;">The stars have acknowledged your skill.</p>`;
+                    }
+                    break;
+                    
+                case 'battle_door':
+                    if (!gameState.keys.battle) {
+                        addAction('⚔️ Enter the training grounds', startBattleGame);
+                    } else {
+                        const d = document.getElementById('room-description');
+                        d.innerHTML += `<p style="color: #4a9eff;">The arena remembers your courage.</p>`;
+                    }
+                    break;
+            }
+        }
+
+        // Dialog system
+        function showDialog(text) {
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `<p class="glow">${text}</p>`;
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            addAction('Continue', () => showRoom(gameState.currentRoom));
+        }
+
+        // Update inventory display
+        function updateInventory() {
+            const items = document.getElementById('inventory-items');
+            items.innerHTML = '';
+            
+            if (gameState.keys.rhythm) {
+                items.innerHTML += '<div class="inventory-item key-item">🎵 Rhythm Key</div>';
+            }
+            if (gameState.keys.space) {
+                items.innerHTML += '<div class="inventory-item key-item">⭐ Cosmic Key</div>';
+            }
+            if (gameState.keys.battle) {
+                items.innerHTML += '<div class="inventory-item key-item">⚔️ Courage Key</div>';
+            }
+            
+            if (items.innerHTML === '') {
+                items.innerHTML = '<div style="color: #666; font-size: 12px;">Empty</div>';
+            }
+        }
+
+        // Check if all keys collected
+        function allKeysCollected() {
+            return gameState.keys.rhythm && gameState.keys.space && gameState.keys.battle;
+        }
+
+        // Victory handler
+        function handleGameVictory(keyType) {
+            gameState.keys[keyType] = true;
+            updateInventory();
+            
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <div class="victory-screen">
+                    <h2 class="key-glow">Victory!</h2>
+                    <p class="glow">You have proven yourself worthy!</p>
+                    <p class="key-glow">You obtained the ${keyType.charAt(0).toUpperCase() + keyType.slice(1)} Key!</p>
+                </div>
+            `;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            
+            // Auto-return to center after 3 seconds
+            setTimeout(() => {
+                desc.innerHTML += `<p style="color: #666;">Returning to the central chamber...</p>`;
+                setTimeout(() => {
+                    showRoom('center');
+                }, 1500);
+            }, 2000);
+        }
+
+        // RHYTHM GAME - Using Phaser
+        function startRhythmGame() {
+            // Check if Phaser is loaded
+            if (!phaserReady || typeof Phaser === 'undefined') {
+                showDialog("Game engine is still loading. Please wait a moment and try again.");
+                return;
+            }
+            
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <div class="game-container">
+                    <div class="game-header">
+                        <h2>🎵 The Rhythm Trial</h2>
+                        <p class="game-instructions">Hit the notes as they reach the target zone!</p>
+                        <p class="game-instructions">Use keys: A, S, D, F</p>
+                    </div>
+                    <div id="rhythm-game"></div>
+                    <div class="game-score">Score: <span id="rhythm-score">0</span> / 10</div>
+                </div>
+            `;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            addAction('Give up', () => {
+                if (gameState.activeGame) {
+                    gameState.activeGame.destroy(true);
+                    gameState.activeGame = null;
+                }
+                showRoom('north');
+            });
+            
+            // Phaser configuration for rhythm game
+            const config = {
+                type: Phaser.AUTO,
+                width: 700,
+                height: 200,
+                parent: 'rhythm-game',
+                backgroundColor: '#111111',
+                scene: {
+                    preload: rhythmPreload,
+                    create: rhythmCreate,
+                    update: rhythmUpdate
+                }
+            };
+            
+            gameState.activeGame = new Phaser.Game(config);
+        }
+        
+        // Rhythm game Phaser functions
+        let rhythmGameData = {
+            score: 0,
+            targetScore: 10,
+            notes: [],
+            tracks: [],
+            noteSpeed: 300,
+            spawnTimer: 0,
+            noteCount: 0,
+            maxNotes: 20
+        };
+        
+        function rhythmPreload() {
+            // No assets to preload - we'll create everything with graphics
+        }
+        
+        function rhythmCreate() {
+            // Reset game data
+            rhythmGameData = {
+                score: 0,
+                targetScore: 10,
+                notes: [],
+                tracks: [],
+                noteSpeed: 300,
+                spawnTimer: 0,
+                noteCount: 0,
+                maxNotes: 20,
+                noteTexts: []
+            };
+            
+            // Create four tracks
+            const trackHeight = 40;
+            const trackY = [30, 70, 110, 150];
+            const trackKeys = ['A', 'S', 'D', 'F'];
+            const trackColors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0xf9ca24];
+            
+            // Draw tracks
+            trackY.forEach((y, i) => {
+                // Track background
+                const track = this.add.rectangle(350, y, 680, trackHeight, 0x222222);
+                track.setStrokeStyle(1, 0x444444);
+                
+                // Target zone
+                const target = this.add.rectangle(100, y, 60, trackHeight + 10, trackColors[i], 0.3);
+                target.setStrokeStyle(2, trackColors[i]);
+                
+                // Add key label
+                this.add.text(30, y, trackKeys[i], {
+                    fontSize: '20px',
+                    color: '#ffffff',
+                    fontFamily: 'Arial'
+                }).setOrigin(0.5);
+                
+                rhythmGameData.tracks.push({
+                    y: y,
+                    key: trackKeys[i],
+                    color: trackColors[i],
+                    target: target
+                });
+            });
+            
+            // Score text
+            this.scoreText = this.add.text(350, 10, 'Hit the notes!', {
+                fontSize: '16px',
+                color: '#ffffff',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
+            
+            // Input handling
+            this.input.keyboard.on('keydown', (event) => {
+                const key = event.key.toUpperCase();
+                const trackIndex = trackKeys.indexOf(key);
+                
+                if (trackIndex !== -1) {
+                    checkRhythmHit.call(this, trackIndex);
+                    // Visual feedback
+                    this.tweens.add({
+                        targets: rhythmGameData.tracks[trackIndex].target,
+                        scaleX: 1.2,
+                        scaleY: 1.2,
+                        duration: 100,
+                        yoyo: true
+                    });
+                }
+            });
+        }
+        
+        function rhythmUpdate(time, delta) {
+            // Spawn notes
+            rhythmGameData.spawnTimer += delta;
+            if (rhythmGameData.spawnTimer > 1000 && rhythmGameData.noteCount < rhythmGameData.maxNotes) {
+                rhythmGameData.spawnTimer = 0;
+                spawnRhythmNote.call(this);
+                rhythmGameData.noteCount++;
+            }
+            
+            // Update notes and their texts together
+            for (let i = rhythmGameData.notes.length - 1; i >= 0; i--) {
+                const note = rhythmGameData.notes[i];
+                const noteText = rhythmGameData.noteTexts[i];
+                
+                if (!note || note.destroyed) {
+                    // Clean up destroyed notes
+                    rhythmGameData.notes.splice(i, 1);
+                    if (noteText && !noteText.destroyed) {
+                        noteText.destroy();
+                    }
+                    rhythmGameData.noteTexts.splice(i, 1);
+                    continue;
+                }
+                
+                // Move note
+                note.x -= rhythmGameData.noteSpeed * delta / 1000;
+                
+                // Move text with note
+                if (noteText && !noteText.destroyed) {
+                    noteText.x = note.x;
+                }
+                
+                // Remove if off screen
+                if (note.x < -50) {
+                    note.destroy();
+                    if (noteText && !noteText.destroyed) {
+                        noteText.destroy();
+                    }
+                    rhythmGameData.notes.splice(i, 1);
+                    rhythmGameData.noteTexts.splice(i, 1);
+                }
+            }
+            
+            // Check win condition
+            if (rhythmGameData.score >= rhythmGameData.targetScore) {
+                this.scene.pause();
+                handleGameVictory('rhythm');
+            } else if (rhythmGameData.noteCount >= rhythmGameData.maxNotes && rhythmGameData.notes.length === 0) {
+                // Game over - not enough score
+                this.scoreText.setText('Try again! You need 10 hits.');
+                this.time.delayedCall(2000, () => {
+                    gameState.activeGame.destroy(true);
+                    gameState.activeGame = null;
+                    startRhythmGame();
+                });
+            }
+        }
+        
+        function spawnRhythmNote() {
+            const trackIndex = Math.floor(Math.random() * 4);
+            const track = rhythmGameData.tracks[trackIndex];
+            
+            // Create note rectangle
+            const note = this.add.rectangle(700, track.y, 40, 35, track.color);
+            note.setStrokeStyle(2, 0xffffff);
+            note.trackIndex = trackIndex;
+            
+            // Add letter text
+            const noteText = this.add.text(700, track.y, track.key, {
+                fontSize: '20px',
+                color: '#ffffff',
+                fontStyle: 'bold',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
+            
+            rhythmGameData.notes.push(note);
+            rhythmGameData.noteTexts.push(noteText);
+        }
+        
+        function checkRhythmHit(trackIndex) {
+            const targetX = 100;
+            const hitWindow = 40;
+            
+            for (let i = 0; i < rhythmGameData.notes.length; i++) {
+                const note = rhythmGameData.notes[i];
+                if (note.trackIndex === trackIndex && Math.abs(note.x - targetX) < hitWindow) {
+                    // Hit!
+                    rhythmGameData.score++;
+                    document.getElementById('rhythm-score').textContent = rhythmGameData.score;
+                    
+                    // Visual feedback - create particles
+                    for (let j = 0; j < 8; j++) {
+                        const particle = this.add.circle(
+                            100, 
+                            rhythmGameData.tracks[trackIndex].y,
+                            4,
+                            0xffd700
+                        );
+                        
+                        const angle = (Math.PI * 2 / 8) * j;
+                        this.tweens.add({
+                            targets: particle,
+                            x: 100 + Math.cos(angle) * 50,
+                            y: rhythmGameData.tracks[trackIndex].y + Math.sin(angle) * 50,
+                            scale: 0,
+                            alpha: 0,
+                            duration: 500,
+                            onComplete: () => particle.destroy()
+                        });
+                    }
+                    
+                    // Remove the note and its text
+                    note.destroy();
+                    if (rhythmGameData.noteTexts[i]) {
+                        rhythmGameData.noteTexts[i].destroy();
+                        rhythmGameData.noteTexts.splice(i, 1);
+                    }
+                    rhythmGameData.notes.splice(i, 1);
+                    
+                    break; // Only hit one note at a time
+                }
+            }
+        }
+
+        // SPACE SHOOTER GAME - Using Phaser
+        function startSpaceGame() {
+            // Check if Phaser is loaded
+            if (!phaserReady || typeof Phaser === 'undefined') {
+                showDialog("Game engine is still loading. Please wait a moment and try again.");
+                return;
+            }
+            
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <div class="game-container">
+                    <div class="game-header">
+                        <h2>⭐ The Cosmic Trial</h2>
+                        <p class="game-instructions">Defend against the asteroid field!</p>
+                        <p class="game-instructions">Move: Arrow Keys | Shoot: Spacebar</p>
+                    </div>
+                    <div id="space-game"></div>
+                    <div class="game-score">Score: <span id="space-score">0</span> / 15</div>
+                </div>
+            `;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            addAction('Give up', () => {
+                if (gameState.activeGame) {
+                    gameState.activeGame.destroy(true);
+                    gameState.activeGame = null;
+                }
+                showRoom('east');
+            });
+            
+            // Phaser configuration for space game
+            const config = {
+                type: Phaser.AUTO,
+                width: 700,
+                height: 500,
+                parent: 'space-game',
+                physics: {
+                    default: 'arcade',
+                    arcade: {
+                        gravity: { y: 0 },
+                        debug: false
+                    }
+                },
+                backgroundColor: '#000033',
+                scene: {
+                    preload: spacePreload,
+                    create: spaceCreate,
+                    update: spaceUpdate
+                }
+            };
+            
+            gameState.activeGame = new Phaser.Game(config);
+        }
+        
+        // Space game data
+        let spaceGameData = {
+            score: 0,
+            targetScore: 15,
+            player: null,
+            bullets: null,
+            asteroids: null,
+            cursors: null,
+            lastFired: 0,
+            stars: [],
+            canFire: true
+        };
+        
+        function spacePreload() {
+            // No assets needed - using graphics
+        }
+        
+        function spaceCreate() {
+            // Reset game data
+            spaceGameData.score = 0;
+            spaceGameData.stars = [];
+            spaceGameData.canFire = true;
+            
+            // Create starfield background
+            for (let i = 0; i < 100; i++) {
+                const star = this.add.circle(
+                    Phaser.Math.Between(0, 700),
+                    Phaser.Math.Between(0, 500),
+                    Phaser.Math.Between(1, 3),
+                    0xffffff
+                );
+                star.setAlpha(Phaser.Math.FloatBetween(0.3, 0.8));
+                star.speed = Phaser.Math.FloatBetween(0.5, 2);
+                spaceGameData.stars.push(star);
+            }
+            
+            // Create player ship as a simple triangle
+            spaceGameData.player = this.add.triangle(350, 450, 0, 0, -15, 30, 15, 30, 0x4a9eff);
+            this.physics.add.existing(spaceGameData.player);
+            spaceGameData.player.body.setCollideWorldBounds(true);
+            
+            // Create groups
+            spaceGameData.bullets = this.physics.add.group();
+            spaceGameData.asteroids = this.physics.add.group();
+            
+            // Input
+            spaceGameData.cursors = this.input.keyboard.createCursorKeys();
+            this.input.keyboard.on('keydown-SPACE', () => {
+                if (spaceGameData.canFire) {
+                    fireBullet.call(this);
+                    spaceGameData.canFire = false;
+                    this.time.delayedCall(200, () => {
+                        spaceGameData.canFire = true;
+                    });
+                }
+            });
+            
+            // Collisions
+            this.physics.add.overlap(spaceGameData.bullets, spaceGameData.asteroids, hitAsteroid, null, this);
+            this.physics.add.overlap(spaceGameData.player, spaceGameData.asteroids, () => {
+                // Player hit - show effect but don't end game
+                this.cameras.main.shake(200, 0.01);
+                this.cameras.main.flash(100, 255, 0, 0);
+            }, null, this);
+            
+            // Spawn asteroids periodically
+            this.time.addEvent({
+                delay: 1500,
+                callback: () => spawnAsteroid.call(this),
+                loop: true
+            });
+            
+            // Score text
+            this.scoreText = this.add.text(350, 20, 'Destroy the asteroids!', {
+                fontSize: '20px',
+                color: '#ffffff',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
+        }
+        
+        function spaceUpdate() {
+            // Move player
+            if (spaceGameData.cursors && spaceGameData.player && spaceGameData.player.body) {
+                if (spaceGameData.cursors.left.isDown) {
+                    spaceGameData.player.body.setVelocityX(-250);
+                } else if (spaceGameData.cursors.right.isDown) {
+                    spaceGameData.player.body.setVelocityX(250);
+                } else {
+                    spaceGameData.player.body.setVelocityX(0);
+                }
+            }
+            
+            // Move stars for parallax effect
+            spaceGameData.stars.forEach(star => {
+                star.y += star.speed;
+                if (star.y > 510) {
+                    star.y = -10;
+                    star.x = Phaser.Math.Between(0, 700);
+                }
+            });
+            
+            // Clean up off-screen objects
+            if (spaceGameData.asteroids) {
+                spaceGameData.asteroids.children.entries.forEach(asteroid => {
+                    if (asteroid.y > 520) {
+                        asteroid.destroy();
+                    }
+                });
+            }
+            
+            if (spaceGameData.bullets) {
+                spaceGameData.bullets.children.entries.forEach(bullet => {
+                    if (bullet.y < -10) {
+                        bullet.destroy();
+                    }
+                });
+            }
+            
+            // Check win condition
+            if (spaceGameData.score >= spaceGameData.targetScore) {
+                this.scene.pause();
+                handleGameVictory('space');
+            }
+        }
+        
+        function fireBullet() {
+            if (!spaceGameData.player || !spaceGameData.bullets) return;
+            
+            const bullet = this.add.rectangle(
+                spaceGameData.player.x, 
+                spaceGameData.player.y - 20,
+                4,
+                12,
+                0x00ff00
+            );
+            
+            this.physics.add.existing(bullet);
+            spaceGameData.bullets.add(bullet);
+            bullet.body.velocity.y = -400;
+        }
+        
+        function spawnAsteroid() {
+            if (!spaceGameData.asteroids) return;
+            
+            const x = Phaser.Math.Between(50, 650);
+            const size = Phaser.Math.Between(20, 40);
+            
+            // Create asteroid as a circle
+            const asteroid = this.add.circle(x, -50, size, 0x8b7355);
+            asteroid.setStrokeStyle(2, 0x654321);
+            
+            this.physics.add.existing(asteroid);
+            spaceGameData.asteroids.add(asteroid);
+            
+            asteroid.body.velocity.y = Phaser.Math.Between(50, 150);
+            asteroid.body.velocity.x = Phaser.Math.Between(-50, 50);
+            asteroid.body.angularVelocity = Phaser.Math.Between(-100, 100);
+        }
+        
+        function hitAsteroid(bullet, asteroid) {
+            if (!bullet || !asteroid) return;
+            
+            // Explosion effect using circles
+            for (let i = 0; i < 8; i++) {
+                const particle = this.add.circle(
+                    asteroid.x,
+                    asteroid.y,
+                    3,
+                    0xffaa00
+                );
+                
+                const angle = (Math.PI * 2 / 8) * i;
+                const speed = Phaser.Math.Between(100, 200);
+                
+                this.tweens.add({
+                    targets: particle,
+                    x: asteroid.x + Math.cos(angle) * speed,
+                    y: asteroid.y + Math.sin(angle) * speed,
+                    scale: 0,
+                    alpha: 0,
+                    duration: 600,
+                    onComplete: () => particle.destroy()
+                });
+            }
+            
+            bullet.destroy();
+            asteroid.destroy();
+            
+            spaceGameData.score++;
+            document.getElementById('space-score').textContent = spaceGameData.score;
+        }
+
+        // BATTLE GAME - Using Phaser
+        function startBattleGame() {
+            // Check if Phaser is loaded
+            if (!phaserReady || typeof Phaser === 'undefined') {
+                showDialog("Game engine is still loading. Please wait a moment and try again.");
+                return;
+            }
+            
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <div class="game-container">
+                    <div class="game-header">
+                        <h2>⚔️ The Courage Trial</h2>
+                        <p class="game-instructions">Defeat the Dog Knight in honorable combat!</p>
+                        <p class="game-instructions">Click on attack buttons or use keys 1, 2, 3</p>
+                    </div>
+                    <div id="battle-game"></div>
+                </div>
+            `;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            addAction('Run away', () => {
+                if (gameState.activeGame) {
+                    gameState.activeGame.destroy(true);
+                    gameState.activeGame = null;
+                }
+                showRoom('west');
+            });
+            
+            // Phaser configuration for battle game
+            const config = {
+                type: Phaser.AUTO,
+                width: 700,
+                height: 400,
+                parent: 'battle-game',
+                backgroundColor: '#1a1a2e',
+                scene: {
+                    preload: battlePreload,
+                    create: battleCreate,
+                    update: battleUpdate
+                }
+            };
+            
+            gameState.activeGame = new Phaser.Game(config);
+        }
+        
+        // Battle game data
+        let battleGameData = {
+            cosmoHP: 100,
+            cosmoMaxHP: 100,
+            knightHP: 150,
+            knightMaxHP: 150,
+            turn: 'player',
+            cosmoSprite: null,
+            knightSprite: null,
+            actionButtons: [],
+            battleText: null,
+            cosmoHealthBar: null,
+            cosmoHealthFill: null,
+            knightHealthBar: null,
+            knightHealthFill: null
+        };
+        
+        function battlePreload() {
+            // We'll create sprites using text/graphics
+        }
+        
+        function battleCreate() {
+            // Reset battle data
+            battleGameData.cosmoHP = 100;
+            battleGameData.knightHP = 150;
+            battleGameData.turn = 'player';
+            battleGameData.actionButtons = [];
+            
+            // Background elements
+            for (let i = 0; i < 50; i++) {
+                const spark = this.add.circle(
+                    Phaser.Math.Between(0, 700),
+                    Phaser.Math.Between(0, 400),
+                    2,
+                    0x4a4a6e
+                );
+                spark.setAlpha(0.3);
+                this.tweens.add({
+                    targets: spark,
+                    alpha: 0.8,
+                    duration: Phaser.Math.Between(1000, 3000),
+                    yoyo: true,
+                    repeat: -1
+                });
+            }
+            
+            // Create Cosmo using a container (non-physics)
+            const cosmoGroup = this.add.container(150, 200);
+            
+            // Cat body
+            const catBody = this.add.ellipse(0, 0, 40, 35, 0xcccccc);
+            // Cat head
+            const catHead = this.add.circle(0, -20, 20, 0xcccccc);
+            // Ears
+            const ear1 = this.add.triangle(-15, -35, 0, 0, 10, 0, 0, 15, 0xcccccc);
+            const ear2 = this.add.triangle(15, -35, 0, 0, -10, 0, 0, 15, 0xcccccc);
+            // Eyes
+            const eye1 = this.add.circle(-8, -20, 3, 0x000000);
+            const eye2 = this.add.circle(8, -20, 3, 0x000000);
+            
+            cosmoGroup.add([catBody, catHead, ear1, ear2, eye1, eye2]);
+            battleGameData.cosmoSprite = cosmoGroup;
+            
+            // Create Dog Knight using a container (non-physics)
+            const knightGroup = this.add.container(550, 200);
+            
+            // Dog body (larger)
+            const dogBody = this.add.ellipse(0, 0, 50, 45, 0xff6666);
+            // Dog head
+            const dogHead = this.add.circle(0, -25, 25, 0xff6666);
+            // Helmet
+            const helmet = this.add.rectangle(0, -35, 40, 20, 0x888888);
+            // Sword
+            const sword = this.add.rectangle(30, -10, 5, 40, 0xcccccc);
+            const swordHandle = this.add.rectangle(30, 10, 15, 5, 0x654321);
+            
+            knightGroup.add([dogBody, dogHead, helmet, sword, swordHandle]);
+            battleGameData.knightSprite = knightGroup;
+            
+            // Health bars
+            this.add.text(150, 120, 'Cosmo', { fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
+            battleGameData.cosmoHealthBar = this.add.rectangle(150, 140, 150, 20, 0x222222);
+            battleGameData.cosmoHealthFill = this.add.rectangle(75, 140, 150, 20, 0x4aff4a).setOrigin(0, 0.5);
+            
+            this.add.text(550, 120, 'Dog Knight', { fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
+            battleGameData.knightHealthBar = this.add.rectangle(550, 140, 150, 20, 0x222222);
+            battleGameData.knightHealthFill = this.add.rectangle(475, 140, 150, 20, 0xff6666).setOrigin(0, 0.5);
+            
+            // Battle text
+            battleGameData.battleText = this.add.text(350, 50, 'The Dog Knight challenges you!', {
+                fontSize: '18px',
+                color: '#4a9eff'
+            }).setOrigin(0.5);
+            
+            // Action buttons
+            const actions = [
+                { name: 'Scratch Attack', key: '1', damage: [15, 25], accuracy: 0.9 },
+                { name: 'Pounce', key: '2', damage: [25, 40], accuracy: 0.7 },
+                { name: 'Mystical Meow', key: '3', damage: [10, 15], heal: 20, accuracy: 1 }
+            ];
+            
+            actions.forEach((action, index) => {
+                const button = this.add.rectangle(200 + index * 150, 330, 140, 40, 0x333333)
+                    .setInteractive()
+                    .setStrokeStyle(2, 0x4a9eff);
+                
+                const buttonText = this.add.text(200 + index * 150, 330, action.name, {
+                    fontSize: '14px',
+                    color: '#ffffff'
+                }).setOrigin(0.5);
+                
+                button.on('pointerover', () => {
+                    button.setFillStyle(0x444444);
+                });
+                
+                button.on('pointerout', () => {
+                    button.setFillStyle(0x333333);
+                });
+                
+                button.on('pointerdown', () => {
+                    if (battleGameData.turn === 'player') {
+                        executeBattleAction.call(this, action);
+                    }
+                });
+                
+                battleGameData.actionButtons.push({ button, text: buttonText, action });
+            });
+            
+            // Keyboard controls
+            this.input.keyboard.on('keydown-ONE', () => {
+                if (battleGameData.turn === 'player') executeBattleAction.call(this, actions[0]);
+            });
+            this.input.keyboard.on('keydown-TWO', () => {
+                if (battleGameData.turn === 'player') executeBattleAction.call(this, actions[1]);
+            });
+            this.input.keyboard.on('keydown-THREE', () => {
+                if (battleGameData.turn === 'player') executeBattleAction.call(this, actions[2]);
+            });
+        }
+        
+        function battleUpdate() {
+            // Update health bar visuals
+            battleGameData.cosmoHealthFill.width = Math.max(0, (battleGameData.cosmoHP / battleGameData.cosmoMaxHP) * 150);
+            battleGameData.knightHealthFill.width = Math.max(0, (battleGameData.knightHP / battleGameData.knightMaxHP) * 150);
+        }
+        
+        function executeBattleAction(action) {
+            if (battleGameData.turn !== 'player') return;
+            battleGameData.turn = 'waiting';
+            
+            // Disable buttons
+            if (battleGameData.actionButtons) {
+                battleGameData.actionButtons.forEach(btn => {
+                    if (btn.button) btn.button.setAlpha(0.5);
+                });
+            }
+            
+            // Check accuracy
+            if (Math.random() <= action.accuracy) {
+                // Hit!
+                const damage = Phaser.Math.Between(action.damage[0], action.damage[1]);
+                battleGameData.knightHP = Math.max(0, battleGameData.knightHP - damage);
+                
+                battleGameData.battleText.setText(`Cosmo uses ${action.name}! Deals ${damage} damage!`);
+                
+                // Heal if applicable
+                if (action.heal) {
+                    battleGameData.cosmoHP = Math.min(battleGameData.cosmoMaxHP, battleGameData.cosmoHP + action.heal);
+                    battleGameData.battleText.setText(`${battleGameData.battleText.text} Heals ${action.heal} HP!`);
+                }
+                
+                // Attack animation
+                this.tweens.add({
+                    targets: battleGameData.cosmoSprite,
+                    x: '+=50',
+                    duration: 100,
+                    yoyo: true,
+                    onComplete: () => {
+                        // Hit effect on knight
+                        this.cameras.main.shake(100, 0.01);
+                    }
+                });
+            } else {
+                battleGameData.battleText.setText(`Cosmo's ${action.name} misses!`);
+            }
+            
+            // Check if knight is defeated
+            if (battleGameData.knightHP <= 0) {
+                this.time.delayedCall(1500, () => {
+                    this.scene.pause();
+                    handleGameVictory('battle');
+                });
+                return;
+            }
+            
+            // Enemy turn after delay
+            this.time.delayedCall(2000, () => {
+                enemyTurn.call(this);
+            });
+        }
+        
+        function enemyTurn() {
+            const attacks = [
+                { name: 'Sword Slash', damage: [15, 20] },
+                { name: 'Tail Wag Confusion', damage: [10, 25] },
+                { name: 'Howl of Valor', damage: [20, 30] }
+            ];
+            
+            const attack = Phaser.Math.RND.pick(attacks);
+            const damage = Phaser.Math.Between(attack.damage[0], attack.damage[1]);
+            
+            battleGameData.cosmoHP = Math.max(0, battleGameData.cosmoHP - damage);
+            if (battleGameData.battleText) {
+                battleGameData.battleText.setText(`Dog Knight uses ${attack.name}! Deals ${damage} damage!`);
+            }
+            
+            // Attack animation
+            if (battleGameData.knightSprite) {
+                this.tweens.add({
+                    targets: battleGameData.knightSprite,
+                    x: '-=50',
+                    duration: 100,
+                    yoyo: true,
+                    onComplete: () => {
+                        this.cameras.main.shake(100, 0.01);
+                    }
+                });
+            }
+            
+            // Check if Cosmo is defeated
+            if (battleGameData.cosmoHP <= 0) {
+                this.time.delayedCall(1500, () => {
+                    if (battleGameData.battleText) {
+                        battleGameData.battleText.setText("Cosmo has been defeated! Try again?");
+                    }
+                    this.time.delayedCall(2000, () => {
+                        gameState.activeGame.destroy(true);
+                        gameState.activeGame = null;
+                        startBattleGame();
+                    });
+                });
+                return;
+            }
+            
+            // Re-enable player turn
+            this.time.delayedCall(1000, () => {
+                battleGameData.turn = 'player';
+                if (battleGameData.actionButtons) {
+                    battleGameData.actionButtons.forEach(btn => {
+                        if (btn.button) btn.button.setAlpha(1);
+                    });
+                }
+            });
+        }
+
+        // FINAL PUZZLE
+        function startFinalPuzzle() {
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <div class="puzzle-container">
+                    <pre class="ascii-art cat">
+        /\\_/\\  
+       ( o.o ) 
+        > ^ <
+                    </pre>
+                    <p class="glow">Cosmo purrs: "You have proven yourself in rhythm, space, and battle."</p>
+                    <p>"Now, arrange the keys to unlock the path forward..."</p>
+                    <div class="key-slots">
+                        <div class="key-slot" id="slot-1" onclick="placeKey(1)">?</div>
+                        <div class="key-slot" id="slot-2" onclick="placeKey(2)">?</div>
+                        <div class="key-slot" id="slot-3" onclick="placeKey(3)">?</div>
+                    </div>
+                    <p style="color: #666; font-size: 14px; font-style: italic;">
+                        "First comes the beat of life's eternal song,<br>
+                        Then the light that guides when nights are long,<br>
+                        Finally, the strength to right what's wrong."
+                    </p>
+                </div>
+            `;
+            
+            const actions = document.getElementById('actions');
+            actions.innerHTML = '';
+            addAction('Reset puzzle', startFinalPuzzle);
+            addAction('Think more...', () => showRoom('center'));
+        }
+        
+        let puzzleState = [null, null, null];
+        const correctOrder = ['rhythm', 'space', 'battle'];
+        const keySymbols = {
+            rhythm: '🎵',
+            space: '⭐',
+            battle: '⚔️'
+        };
+        
+        function placeKey(slot) {
+            const keys = ['rhythm', 'space', 'battle'];
+            const currentKey = puzzleState[slot - 1];
+            let nextKeyIndex = 0;
+            
+            if (currentKey) {
+                nextKeyIndex = (keys.indexOf(currentKey) + 1) % 4;
+            }
+            
+            if (nextKeyIndex === 3) {
+                puzzleState[slot - 1] = null;
+                document.getElementById(`slot-${slot}`).textContent = '?';
+                document.getElementById(`slot-${slot}`).classList.remove('filled');
+            } else {
+                puzzleState[slot - 1] = keys[nextKeyIndex];
+                document.getElementById(`slot-${slot}`).textContent = keySymbols[keys[nextKeyIndex]];
+                document.getElementById(`slot-${slot}`).classList.add('filled');
+            }
+            
+            // Check if puzzle is solved
+            if (puzzleState.every((key, index) => key === correctOrder[index])) {
+                solvePuzzle();
+            }
+        }
+        
+        function solvePuzzle() {
+            gameState.puzzleSolved = true;
+            const desc = document.getElementById('room-description');
+            desc.innerHTML = `
+                <div class="puzzle-container">
+                    <pre class="ascii-art cat" style="color: #ffd700; font-size: 20px;">
+        /\\_/\\  
+       ( o.o ) 
+        > ^ <
+                    </pre>
+                    <p class="key-glow" style="font-size: 24px;">The room fills with golden light!</p>
+                    <p class="glow">"You understand now," Cosmo purrs with pride.</p>
+                    <p class="glow">"The rhythm of creation, the cosmos of possibility, and the courage to pursue your dreams."</p>
+                    <p>"You've proven yourself ready. Go forth and create wonders in the real world."</p>
+                    <a href="portfolio.html" class="portal">Enter the real world →</a>
+                </div>
+            `;
+            
+            document.getElementById('actions').innerHTML = '';
+            
+            // Save completion
+            localStorage.setItem('gameCompleted', 'true');
+        }
+
+        // Initialize inventory
+        updateInventory();
+    </script>
+</body>
+</html>
